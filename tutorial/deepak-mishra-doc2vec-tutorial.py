@@ -1,19 +1,43 @@
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from nltk.tokenize import word_tokenize
 import csv
+import sys
 
+csv.field_size_limit(sys.maxsize)
 data = []
-def readData():
+
+def readData(readKaggle=False):
     data = []
-    with open("../stories.csv") as csv_file:
+    with open("../data/stories.csv") as csv_file:
         csv_reader = csv.DictReader(csv_file)
         line_count = 0
         for row in csv_reader:
-            data.append(row["Title"])
             line_count += 1
+            data.append(row["Content no HTML"])
+        print("Num Entries in stories.csv: " + str(line_count))
+    if(readKaggle):
+        with open("../data/train.csv") as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            print(type(csv_reader))
+            line_count = 0
+            for row in csv_reader:
+                if(row["label"] == '0'):
+                    line_count += 1
+                    data.append(row["text"])
+            print("Num Entries in train.csv: " + str(line_count))
     return data
-def train(max_epochs = 10):
-    data = readData()
+def readTitleData():
+    data = []
+    with open("../data/stories.csv") as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        line_count = 0
+        for row in csv_reader:
+            line_count += 1
+            data.append(row["Title"])
+        print("Num Entries in stories.csv: " + str(line_count))
+    return data
+def train(max_epochs = 100):
+    data = readData(readKaggle=True)
 
     # creates a data store of TaggedDocuments for each data entry
     # each TaggedDocument has words, and a tag for which entry in the data table it was
@@ -43,14 +67,14 @@ def train(max_epochs = 10):
     print("Model Saved")
 
 def inference(dataEntryToMatch = 1221):
-    data = readData()
+    data = readTitleData()
     model = Doc2Vec.load("d2v.model")
 
-    topn = 10
+    topn = 100
 
     similar_doc = model.docvecs.most_similar(str(dataEntryToMatch), topn = topn)
     print("Title to match: ", data[dataEntryToMatch])
     for i in range(topn):
-        print("Closest titles:" , data[int(similar_doc[i][0])])
-
+        if(int(similar_doc[i][0]) < 1225):
+            print("Closest titles:" , data[int(similar_doc[i][0])])
 inference()
