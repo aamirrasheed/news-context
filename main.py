@@ -4,21 +4,23 @@ from nltk.tokenize import word_tokenize
 
 def getarticlecontent(input_file):
     data = []
+    titles = []
     for idx, row in enumerate(input_file):
-        data.append(row["Title"])
-    return data
+        titles.append(row["Title"])
+        data.append(row["Content no HTML"])
+    return data, titles
 
 
 input_file = csv.DictReader(open("Stories.csv"))
-data = getarticlecontent(input_file)
+data, titles = getarticlecontent(input_file)
 
 tagged_data = [TaggedDocument(words=word_tokenize(_d.lower()), tags=[str(i)]) for i, _d in enumerate(data)]
 
-max_epochs = 100
+max_epochs = 1000
 vec_size = 20
 alpha = 0.025
 
-model = Doc2Vec(size=vec_size,
+model = Doc2Vec(vector_size=vec_size,
                 alpha=alpha,
                 min_alpha=0.00025,
                 min_count=1,
@@ -43,11 +45,12 @@ model= Doc2Vec.load("dv.model")
 # print("V1_infer", v1)
 
 
-index_to_match = 1
-print("Trying to match articles for: " + data[index_to_match])
-similar_doc = model.docvecs.most_similar(str(index_to_match))
-for article in similar_doc:
-    print("Matched with: " + data[int(article[0])])
+for index in range(1200, 1224):
+    index_to_match = index
+    print("Trying to match articles for: " + titles[index_to_match])
+    similar_doc = model.docvecs.most_similar(str(index_to_match))
+    for article in similar_doc:
+        print("Matched with: " + titles[int(article[0])])
 
 
 
