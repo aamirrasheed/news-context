@@ -68,25 +68,51 @@ def getSimilarityMatrix(embeddings, trainingData):
             f.write("%s\n" % arr[len(arr) -1])
 
 
-def printMostSimilarArticles(n, embeddings, trainingData, showHistogram):
+
+def printMostSimilarArticles(n, embeddings, trainingData, showHistogram, dissimilarTitles, minDissimilarityPercentage):
     similaritiesArr = []
     for article1 in range(len(trainingData)):
         for article2 in range(len(trainingData)):
             similarity = 1 - spatial.distance.cosine(embeddings[article1], embeddings[article2])
             similaritiesArr.append(similarity)
 
-    print("Most similar two articles:")
-    trainingDataLen = len(trainingData)
-    indicesOfTopN = sorted(range(len(similaritiesArr)), key=lambda i: similaritiesArr[i])[-(n + trainingDataLen):]
-    for i in range(trainingDataLen, trainingDataLen + n):
-        index = indicesOfTopN[len(indicesOfTopN) - i - 1]
-        print("#" + str(i - trainingDataLen + 1) + ":")
-        article1 = int(index) // int(len(trainingData))
-        print(trainingData[article1][0])
-        article2 = int(index) % int(len(trainingData))
-        print(trainingData[article2][0])
-        print(similaritiesArr[index])
-        print("")
+    if (dissimilarTitles):
+        print("Most similar two articles with dissimilar titles")
+        indicesOfTopN = sorted(range(len(similaritiesArr)), key=lambda i: similaritiesArr[i])
+        count = 0
+        indexOfIndicesArr = len(trainingData) + 1
+        while (count < n):
+            indexOfSimilaritiesArr = indicesOfTopN[-indexOfIndicesArr]
+            article1 = int(indexOfSimilaritiesArr) // int(len(trainingData))
+            article1Title = trainingData[article1][0]
+            article2 = int(indexOfSimilaritiesArr) % int(len(trainingData))
+            article2Title = trainingData[article2][0]
+            if (indexOfIndicesArr < len(similaritiesArr)):
+                indexOfIndicesArr += 1
+            else:
+                print ("Could only find " + str(count + 1) + "articles with dissimilar titles!")
+                break
+            sameWords = set.intersection(set(article1Title.lower().split(" ")), set(article2Title.lower().split(" ")))
+            if (len(sameWords) / min(len(article1Title), len(article2Title)) < 1 - minDissimilarityPercentage):
+                print("#" + str(count + 1) + ":")
+                print(article1Title)
+                print(article2Title)
+                print(similaritiesArr[indexOfSimilaritiesArr])
+                print("")
+                count += 1
+    else:
+        print("Most similar two articles")
+        trainingDataLen = len(trainingData)
+        indicesOfTopN = sorted(range(len(similaritiesArr)), key=lambda i: similaritiesArr[i])[-(n + trainingDataLen):]
+        for i in range(trainingDataLen, trainingDataLen + n):
+            index = indicesOfTopN[len(indicesOfTopN) - i - 1]
+            print("#" + str(i - trainingDataLen + 1) + ":")
+            article1 = int(index) // int(len(trainingData))
+            print(trainingData[article1][0])
+            article2 = int(index) % int(len(trainingData))
+            print(trainingData[article2][0])
+            print(similaritiesArr[index])
+            print("")
 
     if (showHistogram):
         plt.hist(similaritiesArr, bins = 20)
@@ -119,14 +145,15 @@ def main():
     model = Doc2Vec.load("wikiModel.bin")
     vectors = getModelVectors(model, trainingContent)
 
-    # printMostSimilarArticles(30, vectors, trainingData, False)
+    printMostSimilarArticles(30, vectors, trainingData, False, True, 0.5)
 
     # matrix = getSimilarityMatrix(vectors, trainingData)
 
     # use the following function to figure out the index of the desired article
     # printAllArticles(trainingData)
 
-    printTopNSimilarities([581, 306, 759, 830] , 10, vectors, trainingData)
+    # printTopNSimilarities([581, 306, 759, 830] , 10, vectors, trainingData)
+
 
 
 
