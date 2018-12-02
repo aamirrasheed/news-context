@@ -1,59 +1,77 @@
+'''
+This file can be run to train the doc2vec model. 
+The model is saved in the same directory as "dv.model" and can be loaded later for inference.
+To adjust the number of iterations we use for Doc2Vec, change the max_epochs variable in the main() function. 
+We used this file to train various models with just titles, just articles, and with various numbers of iterations.
+'''
 import csv
+import random
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from nltk.tokenize import word_tokenize
 
-def getarticlecontent(input_file):
+# returns title and article contents from our stories.csv file
+def getDataFromFile(input_file):
     data = []
-    titles = []
     for idx, row in enumerate(input_file):
-        titles.append(row["Title"])
-        data.append(row["Content no HTML"])
-    return data, titles
+        data.append((row["Title"], row["Content no HTML"]))
+    return data
 
+# given a data output from getDataFromFile(), this method will extract the article content
+def getContent(data):
+    content = []
+    for pair in data:
+        content.append(pair[1])
+    return content
 
-input_file = csv.DictReader(open("Stories.csv"))
-data, titles = getarticlecontent(input_file)
+# this method is responsible for retrieving the data and dividing it into train and test sets
+def getDataSets():
+    # specify size of train set
+    trainingDataSize = 1100
 
-tagged_data = [TaggedDocument(words=word_tokenize(_d.lower()), tags=[str(i)]) for i, _d in enumerate(data)]
+    # get dataset
+    input_file = csv.DictReader(open("Stories.csv"))
+    data = getDataFromFile(input_file)
 
-max_epochs = 1000
-vec_size = 20
-alpha = 0.025
+    # shuffle data
+    random.seed(1)
+    random.shuffle(data)
 
-model = Doc2Vec(vector_size=vec_size,
+    # set variables for each set and return
+    trainingData = data[0:trainingDataSize]
+    trainingContent = getContent(trainingData)
+    testData = data[trainingDataSize::]
+    testContent = getContent(testData)
+    return trainingData, trainingContent, testData, testContent
+
+# runs our model training
+def main(max_epochs=1000, vec_size = 20, alpha = 0.025):
+
+    # organize data
+    trainingData, trainingContent, testData, testContent = getDataSets()
+    tagged_data = [TaggedDocument(words=word_tokenize(_d.lower()), tags=[str(i)]) for i, _d in enumerate(trainingContent)]
+
+    # prepare model
+    model = Doc2Vec(vector_size=vec_size,
                 alpha=alpha,
                 min_alpha=0.00025,
                 min_count=1,
                 dm=1)
 
-model.build_vocab(tagged_data)
+    model.build_vocab(tagged_data)
 
-for epoch in range(max_epochs):
-    print('iteration {0}'.format(epoch))
-    model.train(tagged_data,
+    # train model
+    for epoch in range(max_epochs):
+        print('iteration {0}'.format(epoch))
+        model.train(tagged_data,
                 total_examples=model.corpus_count,
                 epochs=model.iter)
-    model.alpha -= 0.0002
-    model.min_alpha = model.alpha
+        model.alpha -= 0.0002
+        model.min_alpha = model.alpha
 
-model.save("dv.model")
-print("Model Saved")
+    model.save("dv.model")
 
-model= Doc2Vec.load("dv.model")
-# test_data = word_tokenize("Justice Kavanaugh recused in three high court cases so far".lower())
-# v1 = model.infer_vector(test_data)
-# print("V1_infer", v1)
-
-
-for index in range(1200, 1224):
-    index_to_match = index
-    print("Trying to match articles for: " + titles[index_to_match])
-    similar_doc = model.docvecs.most_similar(str(index_to_match))
-    for article in similar_doc:
-        print("Matched with: " + titles[int(article[0])])
-
-
-
+if __name__== "__main__":
+    main()
 
 
 

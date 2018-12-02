@@ -1,24 +1,45 @@
 import csv
-from gensim.models.doc2vec import Doc2Vec, TaggedDocument
-from nltk.tokenize import word_tokenize
+from gensim.models.doc2vec import Doc2Vec
+from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
+from pyclustering.cluster.kmeans import kmeans, kmeans_observer, kmeans_visualizer
 
 def getarticlecontent(input_file):
     data = []
+    titles = []
     for idx, row in enumerate(input_file):
-        data.append(row["Title"])
-    return data
+        titles.append(row["Title"])
+        data.append(row["Content no HTML"])
+    return data, titles
 
+def getModelVectors(model):
+    vecs = [];
+    for i in range(0, 1100):
+        vecs.append(model.docvecs[str(i)])
+    return vecs
+
+
+trainingDataSize = 1100
+testDataSize = 100
+numOfClusters = 25
 
 input_file = csv.DictReader(open("Stories.csv"))
-data = getarticlecontent(input_file)
+data, titles = getarticlecontent(input_file)
 
-model = Doc2Vec.load("d2v.model")
+model = Doc2Vec.load("dv.model")
 
-for index in range(1200, 1224):
-    index_to_match = index
-    print("Trying to match articles for: " + data[index_to_match])
-    similar_doc = model.docvecs.most_similar(str(index_to_match))
-    for article in similar_doc:
-        print("Matched with: " + data[int(article[0])])
-    print("")
+vectors = getModelVectors(model)
+centers = kmeans_plusplus_initializer(vectors, numOfClusters).initialize();
+kmeans_instance = kmeans(vectors, centers)
+kmeans_instance.process()
+clusters = kmeans_instance.get_clusters()
+
+numOfClusters = len(clusters)
+
+trainingLabeled = [0 for x in range(trainingDataSize)]
+for i in range(numOfClusters):
+    print("Cluster " + str(i + 1) + ": ")
+    for j in range(len(clusters[i])):
+        trainingLabeled[clusters[i][j]] = i
+        print(titles[clusters[i][j]])
+
 
