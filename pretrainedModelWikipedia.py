@@ -93,20 +93,21 @@ def printMostSimilarArticles(n, embeddings, trainingData, showHistogram):
         plt.title("Cosine Similarity between Every Two Articles")
         plt.show()
 
-def printTopNSimilarities(index, n, embeddings, trainingData):
-    similaritiesArr = []
-    for article in range(len(trainingData)):
-        similarity = 1 - spatial.distance.cosine(embeddings[index], embeddings[article])
-        similaritiesArr.append(similarity)
+def printTopNSimilarities(indices, n, embeddings, trainingData):
+    for index in indices:
+        similaritiesArr = []
+        for article in range(len(trainingData)):
+            similarity = 1 - spatial.distance.cosine(embeddings[index], embeddings[article])
+            similaritiesArr.append(similarity)
 
-    print("Most similar articles to \"" + trainingData[index][0] + "\":")
-    indicesOfTopN = sorted(range(len(similaritiesArr)), key=lambda i: similaritiesArr[i])[-(n + 1):]
-    for i in range(1, 1 + n):
-        index = indicesOfTopN[len(indicesOfTopN) - i - 1]
-        print("#" + str(i) + ":")
-        print(trainingData[index][0])
-        print(similaritiesArr[index])
-        print("")
+        print("Most similar articles to \"" + trainingData[index][0] + "\":")
+        indicesOfTopN = sorted(range(len(similaritiesArr)), key=lambda i: similaritiesArr[i])[-(n + 1):]
+        for i in range(1, 1 + n):
+            index = indicesOfTopN[len(indicesOfTopN) - i - 1]
+            print("#" + str(i) + ":")
+            print(trainingData[index][0])
+            print(similaritiesArr[index])
+            print("")
 
 def printAllArticles(trainingData):
     for i in range(len(trainingData)):
@@ -125,10 +126,7 @@ def main():
     # use the following function to figure out the index of the desired article
     # printAllArticles(trainingData)
 
-    printTopNSimilarities(index = 581, n = 10, vectors, trainingData)
-    printTopNSimilarities(306, 10, vectors, trainingData)
-    printTopNSimilarities(759, 10, vectors, trainingData)
-    printTopNSimilarities(830, 10, vectors, trainingData)
+    printTopNSimilarities([581, 306, 759, 830] , 10, vectors, trainingData)
 
 
 
