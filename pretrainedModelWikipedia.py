@@ -1,3 +1,10 @@
+'''
+This file includes all of the methods needed to find the most similar articles
+(with dissimilar titles or regardless of titles), print similarity histograms
+(which utalize cosine similarity), and the similarity matrix. The embeddings
+for the articles are the embeddings inferred from the pretrained model "wikiModel.bin".
+'''
+
 import csv
 from gensim.models.doc2vec import Doc2Vec
 from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
@@ -50,6 +57,7 @@ def getModelVectors(model, trainingContent):
         embeddings.append(model.infer_vector(tokenized_vec))
     return embeddings
 
+# this method returns the similarity matrix between every two articles
 def getSimilarityMatrix(embeddings, trainingData):
     similaritiesMatrix = []
     for article1 in range(len(trainingData)):
@@ -58,7 +66,6 @@ def getSimilarityMatrix(embeddings, trainingData):
             similarity = 1 - spatial.distance.cosine(embeddings[article1], embeddings[article2])
             articleArr.append(similarity)
         similaritiesMatrix.append(articleArr)
-    return similaritiesMatrix
 
     # Code that write the matrix to a text file
     with open('similarityMatrix.txt', 'w') as f:
@@ -67,8 +74,13 @@ def getSimilarityMatrix(embeddings, trainingData):
                 f.write("%s," % item)
             f.write("%s\n" % arr[len(arr) -1])
 
+    return similaritiesMatrix
 
-
+# this method prints the most similar articiles. Notes about parameters:
+# n - the number of pairs of similar articles
+# showHistogram - if true, the method should a histogram for the similarities
+# dissimilarTitles - if true, the method prints titles that are dissimilar with at least the minDissimilarityPercentage
+# minDissimilarityPercentage - the minimum percentage of words that need to be different between two titles. This is only used when dissimilarTitles is True.
 def printMostSimilarArticles(n, embeddings, trainingData, showHistogram, dissimilarTitles, minDissimilarityPercentage):
     similaritiesArr = []
     for article1 in range(len(trainingData)):
@@ -76,6 +88,10 @@ def printMostSimilarArticles(n, embeddings, trainingData, showHistogram, dissimi
             similarity = 1 - spatial.distance.cosine(embeddings[article1], embeddings[article2])
             similaritiesArr.append(similarity)
 
+    # if dissimilarTitles is True, it prints only similar articles with dissimlar titles
+    # (you can control the minimum dissimilarity percentage using the parameter
+    # minDissimilarityPercentage). If dissimilarTitles is False, it prints the top n most
+    # similar articles regardless of the similarity/dissimilarity of their titles.
     if (dissimilarTitles):
         print("Most similar two articles with dissimilar titles")
         indicesOfTopN = sorted(range(len(similaritiesArr)), key=lambda i: similaritiesArr[i])
@@ -114,11 +130,17 @@ def printMostSimilarArticles(n, embeddings, trainingData, showHistogram, dissimi
             print(similaritiesArr[index])
             print("")
 
+    # shows the histogram if showHistogram is True
     if (showHistogram):
         plt.hist(similaritiesArr, bins = 20)
-        plt.title("Cosine Similarity between Every Two Articles")
+        plt.title("Cosine Similarity between Every Two Articles (Wikipedia Model)")
+        plt.xlabel("Value of Cosine Similarity")
+        plt.ylabel("Number of Pairs of Articles")
         plt.show()
 
+# prints the top n similar articles for the articles with indices corresponding to the
+# values in the vector "indices".  The indices of the articles are determined by the indices of those
+# articles in the list "embeddings".
 def printTopNSimilarities(indices, n, embeddings, trainingData):
     for index in indices:
         similaritiesArr = []
@@ -135,6 +157,7 @@ def printTopNSimilarities(indices, n, embeddings, trainingData):
             print(similaritiesArr[index])
             print("")
 
+# this method prints the indices of the articles along with the title of the article that each index corresponds to.
 def printAllArticles(trainingData):
     for i in range(len(trainingData)):
         print(str(i) + ": " + trainingData[i][0])
@@ -145,11 +168,11 @@ def main():
     model = Doc2Vec.load("wikiModel.bin")
     vectors = getModelVectors(model, trainingContent)
 
-    printMostSimilarArticles(30, vectors, trainingData, False, True, 0.5)
+    printMostSimilarArticles(1, vectors, trainingData, True, False, 0.5)
 
     # matrix = getSimilarityMatrix(vectors, trainingData)
 
-    # use the following function to figure out the index of the desired article
+    # you can use the following function to figure out the index of the desired article
     # printAllArticles(trainingData)
 
     # printTopNSimilarities([581, 306, 759, 830] , 10, vectors, trainingData)

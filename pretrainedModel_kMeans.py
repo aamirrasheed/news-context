@@ -1,3 +1,8 @@
+'''
+This file clusters document embeddings inferred from the trained model "wikiModel.bin" using k-means
+for k=20. To adjust the number of clusters, adjust numOfClusters in the main() function.
+It prints the clustered articles to the console and labels the training data according to those clusters.
+'''
 import csv
 from gensim.models.doc2vec import Doc2Vec
 from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
@@ -48,29 +53,33 @@ def getModelVectors(model, trainingContent):
         embeddings.append(model.infer_vector(tokenized_vec))
     return embeddings
 
-def main(numOfClusters = 20):
-    # initialize variables
-    trainingData, trainingContent, testData, testContent = getDataSets()
-    model = Doc2Vec.load("wikiModel.bin")
-    vectors = getModelVectors(model, trainingContent)
-
-    # run kmeans and get clusters
-    centers = kmeans_plusplus_initializer(vectors, numOfClusters).initialize();
-    kmeans_instance = kmeans(vectors, centers)
-    kmeans_instance.process()
-    clusters = kmeans_instance.get_clusters()
-
-    numOfClusters = len(clusters)
-
+# this method prints out all clusters and returns the labeled training data
+def getLabelTrainingDatAndPrintClusters(numOfClusters, clusters, trainingData):
     trainingLabeled = [0 for _ in range(len(trainingData))]
-
-    # print out all clusters
     for i in range(numOfClusters):
         print("Cluster " + str(i + 1) + " (" + str(len(clusters[i])) + " articles in this cluster): ")
         for j in range(len(clusters[i])):
             trainingLabeled[clusters[i][j]] = i
             print(trainingData[clusters[i][j]][0])
         print("") #just to seperate clusters when printing
+    return trainingLabeled
+
+def main(numOfClusters = 20):
+    # initialize variables
+    trainingData, trainingContent, testData, testContent = getDataSets()
+    model = Doc2Vec.load("wikiModel.bin")
+    embeddings = getModelVectors(model, trainingContent)
+
+    # run kmeans and get clusters
+    centers = kmeans_plusplus_initializer(embeddings, numOfClusters).initialize();
+    kmeans_instance = kmeans(embeddings, centers)
+    kmeans_instance.process()
+    clusters = kmeans_instance.get_clusters()
+
+    numOfClusters = len(clusters)
+
+    trainingLabeled = getLabelTrainingDatAndPrintClusters(numOfClusters, clusters, trainingData)
+
 
 
 if __name__== "__main__":
