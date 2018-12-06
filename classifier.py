@@ -1,6 +1,11 @@
 import tensorflow as tf
 from tensorflow import keras
 
+def getData():
+    # read embeddings in from file
+    # read cluster labels in from file
+    return
+
 def define_model(numTrainLabels):
     model = keras.Sequential([
         keras.layers.Dense(30, activation=tf.nn.relu),
