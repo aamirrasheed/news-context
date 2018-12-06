@@ -8,7 +8,7 @@ def getData():
 
 def define_model(numTrainLabels):
     model = keras.Sequential([
-        keras.layers.Dense(30, activation=tf.nn.relu),
+        keras.layers.Dense(300, activation=tf.nn.relu),
         keras.layers.Dense(numTrainLabels, activation=tf.nn.softmax)
     ])
 

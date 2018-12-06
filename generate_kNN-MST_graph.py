@@ -77,10 +77,10 @@ def readMatrix(filename):
 
 def writeMatrix(array):
     print("rewriting")
-    np.savetxt('sparse_graph.txt', array, delimiter=",", fmt="%-0.5f")
+    np.savetxt('output/sparse_graph.txt', array, delimiter=",", fmt="%-0.5f")
 
 def main():
-    similarity_matrix = readMatrix("similarityMatrix.txt")
+    similarity_matrix = readMatrix("output/similarityMatrix.txt")
     #similarity_matrix = np.array([[1.0, 0.8, 0.1, 0.2],
     #                              [0.8, 1.0, 0.5, 0.6],
     #                              [0.1, 0.5, 1.0, 0.4],
