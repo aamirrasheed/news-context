@@ -1,10 +1,5 @@
 import tensorflow as tf
 from tensorflow import keras
-import numpy as np
-from gensim.models.doc2vec import Doc2Vec
-from learnDocVectors import readData, getTrainedVectors
-import random
-from xMeans import getLabeledData
 
 def define_model(numTrainLabels):
     model = keras.Sequential([
