@@ -31,8 +31,11 @@ def getContent(data):
 
 # this method is responsible for retrieving the data and dividing it into train and test sets
 def getDataSets():
+    # specify size of train set
+    trainingDataSize = 1100
+
     # get dataset
-    input_file = csv.DictReader(open("Stories.csv"))
+    input_file = csv.DictReader(open("data/Stories.csv"))
     data = getDataFromFile(input_file)
 
     # shuffle data
@@ -61,7 +64,7 @@ def getSimilarityMatrix(embeddings, data):
         similaritiesMatrix.append(articleArr)
 
     # Code that write the matrix to a text file
-    with open('similarityMatrix.txt', 'w') as f:
+    with open('output/similarityMatrix.txt', 'w') as f:
         for arr in similaritiesMatrix:
             for item in arr[:-1]:
                 f.write("%s," % item)
