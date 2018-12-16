@@ -31,9 +31,6 @@ def getContent(data):
 
 # this method is responsible for retrieving the data and dividing it into train and test sets
 def getDataSets():
-    # specify size of train set
-    trainingDataSize = 1100
-
     # get dataset
     input_file = csv.DictReader(open("Stories.csv"))
     data = getDataFromFile(input_file)
@@ -42,27 +39,23 @@ def getDataSets():
     random.seed(1)
     random.shuffle(data)
 
-    # set variables for each set and return
-    trainingData = data[0:trainingDataSize]
-    trainingContent = getContent(trainingData)
-    testData = data[trainingDataSize::]
-    testContent = getContent(testData)
-    return trainingData, trainingContent, testData, testContent
+    content = getContent(data)
+    return data, content
 
 # this gets document embeddings based on article content
-def getModelVectors(model, trainingContent):
+def getModelVectors(model, content):
     embeddings = []
-    for article_content in trainingContent:
+    for article_content in content:
         tokenized_vec = word_tokenize(article_content.lower())
         embeddings.append(model.infer_vector(tokenized_vec))
     return embeddings
 
 # this method returns the similarity matrix between every two articles
-def getSimilarityMatrix(embeddings, trainingData):
+def getSimilarityMatrix(embeddings, data):
     similaritiesMatrix = []
-    for article1 in range(len(trainingData)):
+    for article1 in range(len(data)):
         articleArr = []
-        for article2 in range(len(trainingData)):
+        for article2 in range(len(data)):
             similarity = 1 - spatial.distance.cosine(embeddings[article1], embeddings[article2])
             articleArr.append(similarity)
         similaritiesMatrix.append(articleArr)
@@ -81,10 +74,10 @@ def getSimilarityMatrix(embeddings, trainingData):
 # showHistogram - if true, the method should a histogram for the similarities
 # dissimilarTitles - if true, the method prints titles that are dissimilar with at least the minDissimilarityPercentage
 # minDissimilarityPercentage - the minimum percentage of words that need to be different between two titles. This is only used when dissimilarTitles is True.
-def printMostSimilarArticles(n, embeddings, trainingData, showHistogram, dissimilarTitles, minDissimilarityPercentage):
+def printMostSimilarArticles(n, embeddings, data, showHistogram, dissimilarTitles, minDissimilarityPercentage):
     similaritiesArr = []
-    for article1 in range(len(trainingData)):
-        for article2 in range(len(trainingData)):
+    for article1 in range(len(data)):
+        for article2 in range(len(data)):
             similarity = 1 - spatial.distance.cosine(embeddings[article1], embeddings[article2])
             similaritiesArr.append(similarity)
 
@@ -96,13 +89,13 @@ def printMostSimilarArticles(n, embeddings, trainingData, showHistogram, dissimi
         print("Most similar two articles with dissimilar titles")
         indicesOfTopN = sorted(range(len(similaritiesArr)), key=lambda i: similaritiesArr[i])
         count = 0
-        indexOfIndicesArr = len(trainingData) + 1
+        indexOfIndicesArr = len(data) + 1
         while (count < n):
             indexOfSimilaritiesArr = indicesOfTopN[-indexOfIndicesArr]
-            article1 = int(indexOfSimilaritiesArr) // int(len(trainingData))
-            article1Title = trainingData[article1][0]
-            article2 = int(indexOfSimilaritiesArr) % int(len(trainingData))
-            article2Title = trainingData[article2][0]
+            article1 = int(indexOfSimilaritiesArr) // int(len(data))
+            article1Title = data[article1][0]
+            article2 = int(indexOfSimilaritiesArr) % int(len(data))
+            article2Title = data[article2][0]
             if (indexOfIndicesArr < len(similaritiesArr)):
                 indexOfIndicesArr += 1
             else:
@@ -118,15 +111,15 @@ def printMostSimilarArticles(n, embeddings, trainingData, showHistogram, dissimi
                 count += 1
     else:
         print("Most similar two articles")
-        trainingDataLen = len(trainingData)
-        indicesOfTopN = sorted(range(len(similaritiesArr)), key=lambda i: similaritiesArr[i])[-(n + trainingDataLen):]
-        for i in range(trainingDataLen, trainingDataLen + n):
+        dataLen = len(data)
+        indicesOfTopN = sorted(range(len(similaritiesArr)), key=lambda i: similaritiesArr[i])[-(n + dataLen):]
+        for i in range(dataLen, dataLen + n):
             index = indicesOfTopN[len(indicesOfTopN) - i - 1]
-            print("#" + str(i - trainingDataLen + 1) + ":")
-            article1 = int(index) // int(len(trainingData))
-            print(trainingData[article1][0])
-            article2 = int(index) % int(len(trainingData))
-            print(trainingData[article2][0])
+            print("#" + str(i - dataLen + 1) + ":")
+            article1 = int(index) // int(len(data))
+            print(data[article1][0])
+            article2 = int(index) % int(len(data))
+            print(data[article2][0])
             print(similaritiesArr[index])
             print("")
 
@@ -141,41 +134,55 @@ def printMostSimilarArticles(n, embeddings, trainingData, showHistogram, dissimi
 # prints the top n similar articles for the articles with indices corresponding to the
 # values in the vector "indices".  The indices of the articles are determined by the indices of those
 # articles in the list "embeddings".
-def printTopNSimilarities(indices, n, embeddings, trainingData):
-    for index in indices:
+def printTopNSimilarities(indices, n, embeddings, data):
+    for j in range(len(indices)):
+        index = indices[j]
         similaritiesArr = []
-        for article in range(len(trainingData)):
+        for article in range(len(data)):
             similarity = 1 - spatial.distance.cosine(embeddings[index], embeddings[article])
             similaritiesArr.append(similarity)
 
-        print("Most similar articles to \"" + trainingData[index][0] + "\":")
+        print(str(j + 1) + ". " + "Most similar articles to \"" + data[index][0] + "\":")
         indicesOfTopN = sorted(range(len(similaritiesArr)), key=lambda i: similaritiesArr[i])[-(n + 1):]
         for i in range(1, 1 + n):
             index = indicesOfTopN[len(indicesOfTopN) - i - 1]
             print("#" + str(i) + ":")
-            print(trainingData[index][0])
+            print(data[index][0])
             print(similaritiesArr[index])
             print("")
 
 # this method prints the indices of the articles along with the title of the article that each index corresponds to.
-def printAllArticles(trainingData):
-    for i in range(len(trainingData)):
-        print(str(i) + ": " + trainingData[i][0])
+def printAllArticles(data):
+    for i in range(len(data)):
+        print(str(i) + ": " + data[i][0])
+
+def printHistogramForArticleWordLength(content):
+    articleWordLength = [len(article.split()) for article in content]
+    plt.hist(articleWordLength, bins = 20)
+    plt.title("Word Length of Articles in Dataset")
+    plt.xlabel("Number of Words")
+    plt.ylabel("Number of Articles")
+    plt.show()
 
 def main():
     # initialize variables
-    trainingData, trainingContent, testData, testContent = getDataSets()
+    data, content = getDataSets()
     model = Doc2Vec.load("wikiModel.bin")
-    vectors = getModelVectors(model, trainingContent)
+    vectors = getModelVectors(model, content)
 
-    printMostSimilarArticles(1, vectors, trainingData, True, False, 0.5)
+    # printMostSimilarArticles(5, vectors, data, False, True, 0.5)
 
-    # matrix = getSimilarityMatrix(vectors, trainingData)
+    # matrix = getSimilarityMatrix(vectors, data)
 
     # you can use the following function to figure out the index of the desired article
-    # printAllArticles(trainingData)
+    # printAllArticles(data)
 
-    # printTopNSimilarities([581, 306, 759, 830] , 10, vectors, trainingData)
+    # printHistogramForArticleWordLength(content)
+    arr = []
+    for i in range(len(data) - 50, len(data)):
+        arr.append(i)
+    printTopNSimilarities(arr , 5, vectors, data)
+    print(len(model.docvecs))
 
 
 
