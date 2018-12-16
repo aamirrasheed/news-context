@@ -90,15 +90,15 @@ def showGraph(N, VI):
 
 
 def main():
-    mat_contents = sio.loadmat('Variation 2.mat')
+    mat_contents = sio.loadmat('Variation - L500.mat')
     VI = mat_contents['VI']
     VI = VI[0]
 
-    mat_contents = sio.loadmat('Number of Communities 2.mat')
+    mat_contents = sio.loadmat('Number of Communities - L500.mat')
     N = mat_contents['N']
     N = N[0]
 
-    mat_contents = sio.loadmat('Cluster Labels 2.mat')
+    mat_contents = sio.loadmat('Cluster Labels - L500.mat')
     C = mat_contents['C']
 
     #notes: For 250 optimizations => index = 159 has 308 clusters and the local min of variation of Information
