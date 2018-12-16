@@ -31,9 +31,6 @@ def getContent(data):
 
 # this method is responsible for retrieving the data and dividing it into train and test sets
 def getDataSets():
-    # specify size of train set
-    trainingDataSize = 1100
-
     # get dataset
     input_file = csv.DictReader(open("data/Stories.csv"))
     data = getDataFromFile(input_file)
@@ -181,11 +178,8 @@ def main():
     # printAllArticles(data)
 
     # printHistogramForArticleWordLength(content)
-    arr = []
-    for i in range(len(data) - 50, len(data)):
-        arr.append(i)
-    printTopNSimilarities(arr , 5, vectors, data)
-    print(len(model.docvecs))
+
+    # printTopNSimilarities([100, 1100] , 5, vectors, data)
 
 
 
