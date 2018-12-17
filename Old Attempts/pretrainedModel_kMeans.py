@@ -27,48 +27,41 @@ def getContent(data):
 
 # this method is responsible for retrieving the data and dividing it into train and test sets
 def getDataSets():
-    # specify size of train set
-    trainingDataSize = 1100
-
     # get dataset
-    input_file = csv.DictReader(open("Stories.csv"))
+    input_file = csv.DictReader(open("../data/Stories.csv"))
     data = getDataFromFile(input_file)
 
     # shuffle data
     random.seed(1)
     random.shuffle(data)
 
-    # set variables for each set and return
-    trainingData = data[0:trainingDataSize]
-    trainingContent = getContent(trainingData)
-    testData = data[trainingDataSize::]
-    testContent = getContent(testData)
-    return trainingData, trainingContent, testData, testContent
+    content = getContent(data)
+    return data, content
 
 # this gets document embeddings based on article content
-def getModelVectors(model, trainingContent):
+def getModelVectors(model, content):
     embeddings = []
-    for article_content in trainingContent:
+    for article_content in content:
         tokenized_vec = word_tokenize(article_content.lower())
         embeddings.append(model.infer_vector(tokenized_vec))
     return embeddings
 
 # this method prints out all clusters and returns the labeled training data
-def getLabelTrainingDatAndPrintClusters(numOfClusters, clusters, trainingData):
-    trainingLabeled = [0 for _ in range(len(trainingData))]
+def getLabeledDatAndPrintClusters(numOfClusters, clusters, data):
+    labeledData = [0 for _ in range(len(data))]
     for i in range(numOfClusters):
         print("Cluster " + str(i + 1) + " (" + str(len(clusters[i])) + " articles in this cluster): ")
         for j in range(len(clusters[i])):
-            trainingLabeled[clusters[i][j]] = i
-            print(trainingData[clusters[i][j]][0])
+            labeledData[clusters[i][j]] = i
+            print(data[clusters[i][j]][0])
         print("") #just to seperate clusters when printing
-    return trainingLabeled
+    return labeledData
 
 def main(numOfClusters = 20):
     # initialize variables
-    trainingData, trainingContent, testData, testContent = getDataSets()
-    model = Doc2Vec.load("wikiModel.bin")
-    embeddings = getModelVectors(model, trainingContent)
+    data, content = getDataSets()
+    model = Doc2Vec.load("../wikiModel.bin")
+    embeddings = getModelVectors(model, content)
 
     # run kmeans and get clusters
     centers = kmeans_plusplus_initializer(embeddings, numOfClusters).initialize();
@@ -78,7 +71,7 @@ def main(numOfClusters = 20):
 
     numOfClusters = len(clusters)
 
-    trainingLabeled = getLabelTrainingDatAndPrintClusters(numOfClusters, clusters, trainingData)
+    trainingData = getLabeledDatAndPrintClusters(numOfClusters, clusters, data)
 
 
 
