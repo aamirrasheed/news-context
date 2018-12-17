@@ -136,7 +136,7 @@ def main1():
     #notes: index = 175 has 25 clusters
 
     #findMinimums(VI)
-    writeClustersForWordClouds(N, C, 235)
+    #writeClustersForWordClouds(N, C, 235)
     #showGraph(N, VI)
 
 def main2():
