@@ -156,6 +156,7 @@ def printAllArticles(data):
     for i in range(len(data)):
         print(str(i) + ": " + data[i][0])
 
+# this method prints the histogram of the word length of articles in the dataset
 def printHistogramForArticleWordLength(content):
     articleWordLength = [len(article.split()) for article in content]
     plt.hist(articleWordLength, bins = 20)
@@ -170,17 +171,12 @@ def main():
     model = Doc2Vec.load("wikiModel.bin")
     vectors = getModelVectors(model, content)
 
-    # printMostSimilarArticles(5, vectors, data, False, True, 0.5)
-
-    # matrix = getSimilarityMatrix(vectors, data)
+    #Commented out examples of to use some functions in this file:
+        # printMostSimilarArticles(5, vectors, data, False, True, 0.5)
+        # printTopNSimilarities([126] , 5, vectors, data)
 
     # you can use the following function to figure out the index of the desired article
-    # printAllArticles(data)
-
-    # printHistogramForArticleWordLength(content)
-
-    # printTopNSimilarities([100, 1100] , 5, vectors, data)
-
+        # printAllArticles(data)
 
 
 
