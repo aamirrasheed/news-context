@@ -5,12 +5,18 @@ csv.field_size_limit(sys.maxsize)
 
 def readData():
     data = []
-    with open("stories.csv") as csv_file:
+    avg = 0
+    with open("data/stories.csv") as csv_file:
         csv_reader = csv.DictReader(csv_file)
         line_count = 0
         for row in csv_reader:
             line_count += 1
-            print(row["Status"])
+            avg += len(row['Content no HTML'].split())
+
+        print("Average: ", avg/line_count)
+
+#def showWordLengthGraph():
+
 
 
 
