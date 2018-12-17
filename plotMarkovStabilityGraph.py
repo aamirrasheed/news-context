@@ -1,3 +1,12 @@
+'''
+This file reads the results of the .mat files outputted by the Matlba Markov
+Stability code and includes functions that:
+1. list the articles in each cluster
+2. show a graph of variation of informaiton and number of clusters as functions
+of Markov time
+3. show histogram of cluster sizes (distribution of how many articles are in each cluster)
+'''
+
 import csv
 import random
 import scipy.io as sio
@@ -35,12 +44,16 @@ def getDataSets():
     content = getContent(data)
     return data, content
 
+# this method returns the titles of the data given as input
 def getTitles(data):
     titles = []
     for i in range(len(data)):
         titles.append(data[i][0])
     return titles
 
+# this method returns a 2D array of the clusters. The row n represents the
+# nth cluster and the column m represents the mth element in that clusterself.
+# The elements of the 2D array are the indices of the articles in the array "data".
 def getClusters(data, N, C, index):
     titles = getTitles(data)
     numClusters = N[index]
@@ -50,26 +63,29 @@ def getClusters(data, N, C, index):
         clusters[cluster].append(article)
     return clusters
 
+# prints the number of clusters and the titles of the articles in each cluster
 def printClusters(data, clusters):
     titles = getTitles(data)
     numClusters = len(clusters)
     print("Number of clusters is " + str(numClusters))
     for cluster in range(numClusters):
-        print("Clusters in cluster #" + str(cluster))
+        print("Articles in cluster #" + str(cluster))
         for article in clusters[cluster]:
             print(titles[article])
 
+# shows a histogram of the cluster sizes
 def showHistogramOfClusterSizes(clusters):
     clusterSizes = []
     for cluster in clusters:
         clusterSizes.append(len(cluster))
-
     plt.hist(clusterSizes, bins = 10, range = (0, 30))
     plt.title("Size of Clusters")
     plt.xlabel("Size of Clusters")
     plt.ylabel("Number of Cluster with That Size")
     plt.show()
 
+# shows a graph of the variation of information and the numbere of clusters with
+# respect to Markov Time.
 def showGraph(N, VI):
     t = np.linspace(-1, 0, num=401)
     t = [10**x for x in t]
@@ -106,11 +122,12 @@ def main():
     #notes: For 250 optimizations => index = 175 has 25 clusters
     #notes: or 500 optimizations => index 235
     data, content = getDataSets()
-
     clusters = getClusters(data, N, C, 235)
-    # printClusters(trainingData, clusters)
-    # showHistogramOfClusterSizes(clusters)
-    showGraph(N, VI)
+
+    # Commented out examples of how some functions in this file would be used:
+        # printClusters(trainingData, clusters)
+        # showHistogramOfClusterSizes(clusters)
+        # showGraph(N, VI)
 
 
 
