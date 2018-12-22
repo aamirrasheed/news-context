@@ -1,8 +1,8 @@
-from sklearn.manifold import TSNE
-from classifier import getAndFormatData
-from mpl_toolkits import mplot3d
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+from classifier import getAndFormatData
+from sklearn.manifold import TSNE
+
 
 def getDimReducedData():
     _, X, _, _ = getAndFormatData()
