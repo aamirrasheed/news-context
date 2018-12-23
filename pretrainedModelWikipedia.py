@@ -171,12 +171,12 @@ def main():
     model = Doc2Vec.load("wikiModel.bin")
     vectors = getModelVectors(model, content)
 
-    #Commented out examples of to use some functions in this file:
-        # printMostSimilarArticles(5, vectors, data, False, True, 0.5)
-        # printTopNSimilarities([126] , 5, vectors, data)
+#Commented out examples of to use some functions in this file:
+    # printMostSimilarArticles(5, vectors, data, False, True, 0.5)
+    # printTopNSimilarities([126] , 5, vectors, data)
 
-    # you can use the following function to figure out the index of the desired article
-        # printAllArticles(data)
+# you can use the following function to figure out the index of the desired article
+    # printAllArticles(data)
 
 
     return vectors
